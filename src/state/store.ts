@@ -19,7 +19,7 @@ import { renderCurrent } from '../audio/render'
 import { renderScene } from '../audio/ambientRender'
 import { encodeWav } from '../audio/WavEncoder'
 import { buildPreset } from '../audio/presets'
-import { useSceneStore } from './sceneStore'
+import { useSceneStore, selectedTrack } from './sceneStore'
 import { clamp, downloadBlob, sanitizeFilename } from '../utils/misc'
 
 const HISTORY_MAX = 64
@@ -273,11 +273,23 @@ export const useStore = create<AppState>()(
 
     noteOn: (code, midi) => {
       const st = get()
+      if (st.mode === 'ambient') {
+        const track = selectedTrack()
+        if (track) ambientEngine.noteOn(code, track, midi)
+        else engine.noteOn(code, st.patch, st.buffer, midi, st.velocity) // fallback when no layer selected
+        st.heldAdd(midi)
+        return
+      }
       engine.noteOn(code, st.patch, st.buffer, midi, st.velocity)
       st.heldAdd(midi)
     },
 
     noteOff: (code) => {
+      if (get().mode === 'ambient') {
+        ambientEngine.noteOff(code)
+        engine.noteOffKey(code) // also release any fallback synth voice
+        return
+      }
       engine.noteOffKey(code)
     },
 
