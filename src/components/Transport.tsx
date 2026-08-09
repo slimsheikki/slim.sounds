@@ -1,18 +1,27 @@
 import { useEffect } from 'react'
 import { useStore } from '../state/store'
+import { useSceneStore } from '../state/sceneStore'
 import { engine } from '../audio/Engine'
 import { IconLoop, IconPlay, IconRec, IconStop } from './icons'
 
 export function Transport() {
+  const mode = useStore((s) => s.mode)
   const playing = useStore((s) => s.playing)
   const seqPlaying = useStore((s) => s.seqPlaying)
+  const scenePlaying = useStore((s) => s.scenePlaying)
   const recording = useStore((s) => s.recording)
-  const loop = useStore((s) => s.patch.sampler.loop)
+  const samplerLoop = useStore((s) => s.patch.sampler.loop)
+  const sceneLoop = useSceneStore((s) => s.scene.loop)
+  const toggleSampleLoop = useStore((s) => s.toggleLoop)
+  const toggleSceneLoop = useSceneStore((s) => s.toggleLoop)
   const play = useStore((s) => s.play)
   const stop = useStore((s) => s.stop)
-  const toggleLoop = useStore((s) => s.toggleLoop)
   const startRec = useStore((s) => s.startRec)
   const stopRec = useStore((s) => s.stopRec)
+
+  const ambient = mode === 'ambient'
+  const loop = ambient ? sceneLoop : samplerLoop
+  const toggleLoop = ambient ? toggleSceneLoop : toggleSampleLoop
 
   // watch the one-shot playback and clear the PLAY light when it ends
   useEffect(() => {
@@ -29,7 +38,7 @@ export function Transport() {
     return () => cancelAnimationFrame(raf)
   }, [playing])
 
-  const isOn = playing || seqPlaying
+  const isOn = playing || seqPlaying || scenePlaying
 
   return (
     <div className="transport">
@@ -46,7 +55,11 @@ export function Transport() {
       >
         <IconRec size={20} color="var(--amber)" />
       </button>
-      <button className={`t-btn${loop ? ' lit-loop' : ''}`} onClick={toggleLoop} title="loop sample playback">
+      <button
+        className={`t-btn${loop ? ' lit-loop' : ''}`}
+        onClick={toggleLoop}
+        title={ambient ? 'loop the scene forever' : 'loop sample playback'}
+      >
         <IconLoop size={20} color="#edede8" />
         <span className="loop-dot" />
       </button>

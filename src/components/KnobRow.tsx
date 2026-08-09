@@ -1,4 +1,5 @@
 import { useStore } from '../state/store'
+import { useSceneStore } from '../state/sceneStore'
 import type { KnobSpec } from './Knob'
 import { Knob } from './Knob'
 import { fmtHz, fmtPct, fmtSecs } from '../utils/misc'
@@ -16,10 +17,38 @@ const BLANK: Omit<KnobSpec, 'onChange'> & { onChange: (v: number) => void } = {
   disabled: true,
 }
 
+type AmbKey = 'level' | 'tone' | 'motion' | 'space'
+
+function AmbientKnobs() {
+  const scene = useSceneStore((s) => s.scene)
+  const selId = useSceneStore((s) => s.selectedId)
+  const updateTrack = useSceneStore((s) => s.updateTrack)
+  const begin = useSceneStore((s) => s.beginGesture)
+  const end = useSceneStore((s) => s.endGesture)
+  const track = scene.tracks.find((t) => t.id === selId) ?? null
+
+  const ak = (label: string, idx: number, key: AmbKey, def: number): KnobSpec =>
+    track
+      ? { label, color: C[idx], value: track[key], min: 0, max: 1, format: fmtPct, defaultValue: def, onChange: (v) => updateTrack(track.id, { [key]: v }) }
+      : { ...BLANK, label, color: C[idx] }
+
+  const knobs = [ak('LEVEL', 0, 'level', 0.6), ak('TONE', 1, 'tone', 0.5), ak('MOTION', 2, 'motion', 0.4), ak('SPACE', 3, 'space', 0.5)]
+
+  return (
+    <div className="knob-deck">
+      {knobs.map((k, i) => (
+        <Knob key={`amb-${i}`} {...k} onGestureStart={track ? begin : undefined} onGestureEnd={track ? end : undefined} />
+      ))}
+    </div>
+  )
+}
+
 export function KnobRow() {
   const st = useStore()
   const { mutatePatch, beginGesture, endGesture } = st
   const p = st.patch
+
+  if (st.mode === 'ambient') return <AmbientKnobs />
 
   const patchKnob = (
     label: string,

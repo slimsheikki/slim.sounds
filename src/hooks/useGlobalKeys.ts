@@ -1,15 +1,17 @@
 import { useEffect } from 'react'
 import { useStore } from '../state/store'
+import { useSceneStore } from '../state/sceneStore'
 import { useKeysStore } from '../state/keyboardStore'
 import type { Mode } from '../state/types'
 
 const MODE_KEYS: Record<string, Mode> = {
-  Digit1: 'sample',
-  Digit2: 'synth',
-  Digit3: 'keys',
-  Digit4: 'fx',
-  Digit5: 'seq',
-  Digit6: 'export',
+  Digit1: 'ambient',
+  Digit2: 'sample',
+  Digit3: 'synth',
+  Digit4: 'keys',
+  Digit5: 'fx',
+  Digit6: 'seq',
+  Digit7: 'export',
 }
 
 const isTyping = (t: EventTarget | null) => {
@@ -35,11 +37,12 @@ export function useGlobalKeys() {
 
       if (e.key === 'Shift') st.setShiftHeld(true)
 
-      // undo / redo
+      // undo / redo (scene history in ambient mode, patch history elsewhere)
       if (mod && code === 'KeyZ') {
         e.preventDefault()
-        if (e.shiftKey) st.redo()
-        else st.undo()
+        const amb = st.mode === 'ambient'
+        if (e.shiftKey) amb ? useSceneStore.getState().redo() : st.redo()
+        else amb ? useSceneStore.getState().undo() : st.undo()
         return
       }
       if (mod) return // leave other browser shortcuts alone

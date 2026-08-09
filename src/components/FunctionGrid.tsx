@@ -1,21 +1,33 @@
 import { useStore } from '../state/store'
+import { useSceneStore } from '../state/sceneStore'
 import { openImportDialog } from '../utils/importPicker'
 import { IconCopy, IconImport, IconMutate, IconPreset, IconRec, IconRedo, IconUndo } from './icons'
 
 export function FunctionGrid() {
+  const mode = useStore((s) => s.mode)
   const recording = useStore((s) => s.recording)
   const startRec = useStore((s) => s.startRec)
   const stopRec = useStore((s) => s.stopRec)
   const presetsOpen = useStore((s) => s.presetsOpen)
   const setPresetsOpen = useStore((s) => s.setPresetsOpen)
   const mutateSound = useStore((s) => s.mutateSound)
-  const undo = useStore((s) => s.undo)
-  const redo = useStore((s) => s.redo)
-  const canUndo = useStore((s) => s.past.length > 0)
-  const canRedo = useStore((s) => s.future.length > 0)
+  const patchUndo = useStore((s) => s.undo)
+  const patchRedo = useStore((s) => s.redo)
+  const patchCanUndo = useStore((s) => s.past.length > 0)
+  const patchCanRedo = useStore((s) => s.future.length > 0)
+  const sceneUndo = useSceneStore((s) => s.undo)
+  const sceneRedo = useSceneStore((s) => s.redo)
+  const sceneCanUndo = useSceneStore((s) => s.past.length > 0)
+  const sceneCanRedo = useSceneStore((s) => s.future.length > 0)
   const abSlot = useStore((s) => s.abSlot)
   const switchAB = useStore((s) => s.switchAB)
   const copyAB = useStore((s) => s.copyAB)
+
+  const ambient = mode === 'ambient'
+  const undo = ambient ? sceneUndo : patchUndo
+  const redo = ambient ? sceneRedo : patchRedo
+  const canUndo = ambient ? sceneCanUndo : patchCanUndo
+  const canRedo = ambient ? sceneCanRedo : patchCanRedo
 
   return (
     <div className="fn-grid">

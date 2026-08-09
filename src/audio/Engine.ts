@@ -23,6 +23,7 @@ export const synthHold = (p: Patch) => Math.max(0.12, p.synth.adsr.a * 1.2 + p.s
 class Engine {
   chain: EffectsChain | null = null
   analyser: AnalyserNode | null = null
+  externalIn: GainNode | null = null
   private master: GainNode | null = null
   private held = new Map<string, Voice>()
   private shots = new Set<Voice>()
@@ -56,12 +57,20 @@ class Engine {
       this.analyser = ctx.createAnalyser()
       this.analyser.fftSize = 2048
       this.analyser.smoothingTimeConstant = 0.75
+      this.externalIn = ctx.createGain() // ambient engine (and future sources) tap in here
       this.chain.output.connect(this.master)
+      this.externalIn.connect(this.master)
       this.master.connect(limiter)
       limiter.connect(this.analyser)
       this.analyser.connect(ctx.destination)
     }
     return { ctx, input: this.chain.input }
+  }
+
+  /** Shared bus for external sound sources (ambient engine) — post-source, pre-volume/limiter. */
+  getExternalIn(): GainNode {
+    this.ensure()
+    return this.externalIn!
   }
 
   updateFx(fx: FxParams) {

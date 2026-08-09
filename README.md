@@ -1,16 +1,17 @@
 # slim.sounds · SOLAR SFX-1
 
-An online soundmaker for video game sfx — a solar-punk hardware instrument that lives in your browser.
+An online soundmaker for video game sfx **and** ambience — a solar-punk hardware instrument that lives fullscreen in your browser.
 
-![SOLAR SFX-1](docs/screenshot.png)
+![Ambient timeline](docs/screenshot.png)
 
-**slim.sounds** is not a DAW. It's a focused sound-design instrument for game audio, built around one loop:
+**slim.sounds** is not a DAW. It's a focused instrument for game audio with two hearts:
 
 ```
-RECORD SOMETHING → TWIST IT → PLAY IT → MAKE IT WEIRD → EXPORT WAV
+AMBIENCE   stack looping layers on a timeline → a scene that plays forever → export a seamless loop
+SFX        record / synth something → twist it → make it weird → export a one-shot WAV
 ```
 
-Record a "clack" and turn it into a futuristic UI click. Hit a mug and make it a sci-fi impact. Or start from an oscillator and sculpt a laser, a coin, a jump, a solar charge.
+Build a rainy alley or a solar-charged space station by layering wind, drones, rain and sparkle on a timeline — then drop the looping WAV straight into your game. Or record a "clack" and turn it into a futuristic UI click; hit a mug and make it a sci-fi impact.
 
 ## Running it
 
@@ -24,6 +25,7 @@ Everything runs client-side on the Web Audio API — no backend, no accounts, no
 
 ## The instrument
 
+- **AMBIENCE** — a generative timeline for futuristic ambient beds. Stack up to nine looping **layers** (WIND · DRONE · PAD · RAIN · WATER · HUM · SURGE · SPARK · BELLS), each a live synthesis voice — sustained textures draw as `~~~`, sparse event layers as scattered `* *`. Drag clip bodies to move, edges to resize; the four knobs sculpt the selected layer (LEVEL / TONE / MOTION / SPACE). Press play and the scene loops forever with soft per-clip crossfades. A **90s LOFI** master (tape-ish bitcrush + gentle lowpass + chorus + plate reverb) gives it that early-2000s game-CD feel. **EXPORT LOOP** renders a seamless WAV — game background music, ready to drop in. Eight scene presets (Forest Dawn, Space Station, Rainy Alley, Crystal Cave, Underwater, Menu Loop, Ancient Ruins, Solar Field) are starting points.
 - **SAMPLE** — record from the mic, drop in audio files (WAV/MP3/OGG/M4A…), then trim, crop, zoom, reverse, normalize, fade, re-pitch and re-speed on a tactile waveform editor.
 - **SYNTH** — two oscillators (sine/tri/saw/square) + noise, a draggable ADSR envelope, and a dedicated **pitch envelope** (the secret to zaps, falls, rises and power-ups).
 - **KEYS** — your laptop keyboard is the instrument. Fully remappable: click a key, assign any note (or just press a key, then tap a piano key to bind it). Layouts save to local storage.
@@ -33,19 +35,19 @@ Everything runs client-side on the Web Audio API — no backend, no accounts, no
 
 Plus: **presets** (starting points across UI / movement / combat / gameplay / solarpunk), **MUTATE** (smart randomization within sensible ranges), **undo/redo**, **A/B compare**, and a little solar meter that charges off the sounds you make.
 
-![Envelope editor](docs/screenshot-envelope.png)
+![SFX sampler](docs/screenshot-sfx.png)
 
 ## Keys & shortcuts
 
 | Key | Action |
 | --- | --- |
 | `A W S E D F T G Y H U J K O L P ; '` | play notes (default layout, remappable in KEYS) |
-| `space` | play / stop |
+| `space` | play / stop (loops the scene in AMBIENCE) |
 | `R` | record / stop recording (`esc` discards) |
-| `M` | mutate |
-| `1–6` | sample · synth · keys · fx · seq · export |
+| `M` | mutate (the sound, or the whole scene in AMBIENCE) |
+| `1–7` | ambience · sample · synth · keys · fx · seq · export |
 | `Z` / `X` | octave down / up |
-| `⌘/ctrl Z` · `⌘/ctrl ⇧ Z` | undo · redo |
+| `⌘/ctrl Z` · `⌘/ctrl ⇧ Z` | undo · redo (scene history in AMBIENCE) |
 | `⇧A` / `⇧B` | switch to sound A / B |
 | `⇧L` | loop toggle · `⇧E` export panel |
 
@@ -54,5 +56,7 @@ Knobs: drag vertically, scroll, `shift` for fine control, double-click to reset.
 ## Stack
 
 React + TypeScript + Vite + Zustand + Web Audio API. No UI frameworks — the whole visual system is hand-built. Audio engine (`src/audio/`) is fully independent of the UI: voices with pitch-envelope-driven detune, a modular effects chain (shared between live playback and offline export rendering), an AudioWorklet bitcrusher, a procedural-IR reverb, and a 16/24-bit WAV encoder.
+
+The **ambient engine** (`AmbientEngine` + `ambientVoices`) is a separate persistent generative graph: per-layer synthesis voices feeding a shared plate reverb and a 90s-lofi master bus, driven by a lookahead scheduler that region-gates continuous textures and scatters discrete events across each loop cycle. It shares the same master/limiter/meter as the SFX engine and renders offline to a seamless loop for export. Both engines stay UI-independent; scene state lives in its own Zustand store with its own undo history and persistence.
 
 *running on daylight ☀*
