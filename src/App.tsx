@@ -1,5 +1,6 @@
 import { useEffect } from 'react'
 import { loadPersisted, useStore } from './state/store'
+import { loadPersistedScene } from './state/sceneStore'
 import { useGlobalKeys } from './hooks/useGlobalKeys'
 import { LeftRail } from './components/LeftRail'
 import { DisplayPanel } from './components/DisplayPanel'
@@ -13,9 +14,11 @@ import { IconSun } from './components/icons'
 export default function App() {
   useGlobalKeys()
   const dragOver = useStore((s) => s.dragOver)
+  const mode = useStore((s) => s.mode)
 
   useEffect(() => {
     loadPersisted()
+    loadPersistedScene()
   }, [])
 
   // drag & drop import — anywhere on the page
@@ -69,8 +72,8 @@ export default function App() {
             <KnobRow />
             <FunctionGrid />
           </div>
-          <StepSeq />
-          <Piano />
+          {mode !== 'ambient' && <StepSeq />}
+          {mode !== 'ambient' && <Piano />}
         </div>
       </div>
       {dragOver && (

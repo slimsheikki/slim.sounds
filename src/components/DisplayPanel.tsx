@@ -13,6 +13,7 @@ import { ExportView } from './views/ExportView'
 import { RecordOverlay } from './views/RecordOverlay'
 import { PresetsOverlay } from './PresetsOverlay'
 import { FX_META } from './views/FxView'
+import { AmbientTimeline } from './views/AmbientTimeline'
 
 const MODE_TITLES: Record<string, string> = {
   sample: 'SAMPLER',
@@ -98,12 +99,14 @@ function TopBar() {
   const bpm = useStore((s) => s.bpm)
   const playing = useStore((s) => s.playing)
   const seqPlaying = useStore((s) => s.seqPlaying)
+  const scenePlaying = useStore((s) => s.scenePlaying)
   const recording = useStore((s) => s.recording)
   const exporting = useStore((s) => s.exporting)
   const soundSource = useStore((s) => s.patch.soundSource)
 
-  const state = exporting ? 'EXPORTING' : recording ? 'RECORDING' : playing || seqPlaying ? 'PLAYING' : 'IDLE'
-  const cls = exporting ? 'exporting' : recording ? 'recording' : playing || seqPlaying ? 'playing' : ''
+  const on = playing || seqPlaying || scenePlaying
+  const state = exporting ? 'EXPORTING' : recording ? 'RECORDING' : on ? 'PLAYING' : 'IDLE'
+  const cls = exporting ? 'exporting' : recording ? 'recording' : on ? 'playing' : ''
 
   return (
     <div className="disp-topbar">
@@ -141,6 +144,19 @@ export function DisplayPanel() {
   const recording = useStore((s) => s.recording)
   const presetsOpen = useStore((s) => s.presetsOpen)
   const toast = useStore((s) => s.toast)
+
+  if (mode === 'ambient') {
+    return (
+      <div className="display">
+        <div className="display-inner ambient">
+          <AmbientTimeline />
+          {recording && <RecordOverlay />}
+          {presetsOpen && <PresetsOverlay />}
+          {toast && <div className="toast">{toast}</div>}
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div className="display">

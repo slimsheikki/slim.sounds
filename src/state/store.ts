@@ -12,11 +12,14 @@ import {
 } from './types'
 import { engine } from '../audio/Engine'
 import { decodeAudioFile } from '../audio/Engine'
+import { ambientEngine } from '../audio/AmbientEngine'
 import { startRecording, type RecorderHandles } from '../audio/Recorder'
 import { cropBuffer, normalizeBuffer } from '../audio/context'
 import { renderCurrent } from '../audio/render'
+import { renderScene } from '../audio/ambientRender'
 import { encodeWav } from '../audio/WavEncoder'
 import { buildPreset } from '../audio/presets'
+import { useSceneStore } from './sceneStore'
 import { clamp, downloadBlob, sanitizeFilename } from '../utils/misc'
 
 const HISTORY_MAX = 64
@@ -33,6 +36,7 @@ interface AppState {
   volume: number
   playing: boolean
   seqPlaying: boolean
+  scenePlaying: boolean
   recording: boolean
   recHandles: RecorderHandles | null
   exporting: boolean
@@ -76,6 +80,8 @@ interface AppState {
   play: () => void
   stop: () => void
   toggleSeqPlay: () => void
+  toggleScenePlay: () => void
+  exportScene: () => Promise<void>
   startRec: () => Promise<void>
   stopRec: (cancel?: boolean) => Promise<void>
   importFile: (file: File) => Promise<void>
@@ -96,7 +102,7 @@ let toastTimer: number | null = null
 
 export const useStore = create<AppState>()(
   subscribeWithSelector((set, get) => ({
-    mode: 'synth',
+    mode: 'ambient',
     synthTab: 'main',
     selectedFx: 'filter',
     patch: defaultPatch(),
@@ -107,6 +113,7 @@ export const useStore = create<AppState>()(
     volume: 0.85,
     playing: false,
     seqPlaying: false,
+    scenePlaying: false,
     recording: false,
     recHandles: null,
     exporting: false,
@@ -204,6 +211,11 @@ export const useStore = create<AppState>()(
     },
 
     mutateSound: () => {
+      if (get().mode === 'ambient') {
+        useSceneStore.getState().mutateScene()
+        get().setToast('SCENE MUTATED')
+        return
+      }
       get().pushHistory()
       const st = get()
       const p = clonePatch(st.patch)
@@ -274,6 +286,10 @@ export const useStore = create<AppState>()(
 
     play: () => {
       const st = get()
+      if (st.mode === 'ambient') {
+        st.toggleScenePlay()
+        return
+      }
       if (st.mode === 'seq') {
         st.toggleSeqPlay()
         return
@@ -285,7 +301,49 @@ export const useStore = create<AppState>()(
 
     stop: () => {
       engine.stopEverything()
-      set({ playing: false, seqPlaying: false, held: [] })
+      ambientEngine.stop()
+      set({ playing: false, seqPlaying: false, scenePlaying: false, held: [] })
+    },
+
+    toggleScenePlay: () => {
+      const st = get()
+      if (st.scenePlaying) {
+        ambientEngine.stop()
+        set({ scenePlaying: false })
+        return
+      }
+      const scene = useSceneStore.getState().scene
+      if (!scene.tracks.length) {
+        get().setToast('ADD A LAYER FIRST')
+        return
+      }
+      ambientEngine.start(() => useSceneStore.getState().scene)
+      set({ scenePlaying: true })
+    },
+
+    exportScene: async () => {
+      const st = get()
+      if (st.exporting) return
+      const scene = useSceneStore.getState().scene
+      if (!scene.tracks.length) {
+        get().setToast('EMPTY SCENE — ADD LAYERS')
+        return
+      }
+      set({ exporting: true })
+      get().setToast('RENDERING LOOP…')
+      try {
+        const rendered = await renderScene(scene, st.exportSettings)
+        if (!rendered) throw new Error('render failed')
+        const blob = encodeWav(rendered, st.exportSettings.depth)
+        const base = sanitizeFilename(scene.name || st.exportSettings.name)
+        const fname = `${base}_loop.wav`
+        downloadBlob(blob, fname)
+        get().setToast(`EXPORTED ${fname.toUpperCase()} ☀`)
+      } catch {
+        get().setToast('EXPORT FAILED')
+      } finally {
+        set({ exporting: false })
+      }
     },
 
     toggleSeqPlay: () => {

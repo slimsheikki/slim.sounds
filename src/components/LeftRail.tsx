@@ -3,15 +3,16 @@ import { useStore } from '../state/store'
 import type { Mode } from '../state/types'
 import { Knob } from './Knob'
 import { Energy } from './Energy'
-import { IconExport, IconGrid, IconKeys, IconSine, IconSpark, IconSun, IconWave } from './icons'
+import { IconExport, IconGrid, IconKeys, IconSine, IconSpark, IconSun, IconTimeline, IconWave } from './icons'
 
 const MODES: { id: Mode; label: string; icon: ReactNode; shortcut: string }[] = [
-  { id: 'sample', label: 'SAMPLE', icon: <IconWave />, shortcut: '1' },
-  { id: 'synth', label: 'SYNTH', icon: <IconSine />, shortcut: '2' },
-  { id: 'keys', label: 'KEYS', icon: <IconKeys />, shortcut: '3' },
-  { id: 'fx', label: 'FX', icon: <IconSpark />, shortcut: '4' },
-  { id: 'seq', label: 'SEQ', icon: <IconGrid />, shortcut: '5' },
-  { id: 'export', label: 'EXPORT', icon: <IconExport />, shortcut: '6' },
+  { id: 'ambient', label: 'AMBIENCE', icon: <IconTimeline />, shortcut: '1' },
+  { id: 'sample', label: 'SAMPLE', icon: <IconWave />, shortcut: '2' },
+  { id: 'synth', label: 'SYNTH', icon: <IconSine />, shortcut: '3' },
+  { id: 'keys', label: 'KEYS', icon: <IconKeys />, shortcut: '4' },
+  { id: 'fx', label: 'FX', icon: <IconSpark />, shortcut: '5' },
+  { id: 'seq', label: 'SEQ', icon: <IconGrid />, shortcut: '6' },
+  { id: 'export', label: 'EXPORT', icon: <IconExport />, shortcut: '7' },
 ]
 
 export function LeftRail() {

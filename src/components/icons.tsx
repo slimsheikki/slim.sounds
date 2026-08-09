@@ -98,6 +98,15 @@ export const IconCopy = (p: IconProps) => (
   <S {...p}><rect x="5.5" y="5.5" width="8" height="8" rx="1" /><path d="M10.5 3.5v-1h-8v8h1" /></S>
 )
 
+export const IconTimeline = (p: IconProps) => (
+  <S {...p}>
+    <path d="M1.5 3.5h13" />
+    <rect x="1.5" y="6" width="10" height="2.2" rx="1" />
+    <rect x="4" y="9.4" width="8.5" height="2.2" rx="1" />
+    <rect x="2.5" y="12.8" width="5" height="2.2" rx="1" />
+  </S>
+)
+
 export const IconLeafWave = (p: IconProps) => (
   <S {...p}><path d="M2 13c0-6 4-10 12-11-1 8-5 12-11 12" /><path d="M2 13c3-3 6-5 9-8" /></S>
 )

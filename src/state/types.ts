@@ -1,4 +1,4 @@
-export type Mode = 'sample' | 'synth' | 'keys' | 'fx' | 'seq' | 'export'
+export type Mode = 'ambient' | 'sample' | 'synth' | 'keys' | 'fx' | 'seq' | 'export'
 export type SoundSource = 'synth' | 'sample'
 export type OscWave = 'sine' | 'triangle' | 'sawtooth' | 'square'
 export type SynthTab = 'main' | 'osc' | 'env' | 'pitch'
