@@ -3,13 +3,13 @@ import type { FxId, FxParams } from '../../state/types'
 import { fmtHz, fmtPct, fmtSecs } from '../../utils/misc'
 
 export const FX_META: { id: FxId; name: string; color: string }[] = [
-  { id: 'filter', name: 'FILTER', color: '#55aae8' },
-  { id: 'dist', name: 'DRIVE', color: '#f2823f' },
+  { id: 'filter', name: 'FILTER', color: '#3e9be0' },
+  { id: 'dist', name: 'DRIVE', color: '#ee5a2c' },
   { id: 'crush', name: 'CRUSH', color: '#e85c4a' },
-  { id: 'chorus', name: 'CHORUS', color: '#62c46f' },
-  { id: 'delay', name: 'DELAY', color: '#ffc940' },
-  { id: 'reverb', name: 'SPACE', color: '#55aae8' },
-  { id: 'eq', name: 'EQ', color: '#62c46f' },
+  { id: 'chorus', name: 'CHORUS', color: '#56be68' },
+  { id: 'delay', name: 'DELAY', color: '#f5c543' },
+  { id: 'reverb', name: 'SPACE', color: '#3e9be0' },
+  { id: 'eq', name: 'EQ', color: '#56be68' },
 ]
 
 function preview(fx: FxParams, id: FxId): [string, string][] {

@@ -2,7 +2,7 @@ import { useStore } from '../../state/store'
 import { midiName } from '../../utils/notes'
 import { MiniDrag } from '../MiniDrag'
 
-const ROW_COLORS = ['#ffc940', '#55aae8', '#62c46f', '#f2823f']
+const ROW_COLORS = ['#f5c543', '#3e9be0', '#56be68', '#ee5a2c']
 
 export function SeqView() {
   const seq = useStore((s) => s.patch.seq)

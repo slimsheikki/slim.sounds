@@ -6,10 +6,9 @@ import { clamp } from '../../utils/misc'
 import { IconRec, IconImport } from '../icons'
 import { openImportDialog } from '../../utils/importPicker'
 
-const INK = '#e9e2cc'
-const SUN = '#ffc940'
-const SKY = '#55aae8'
-const LEAF = '#62c46f'
+const INK = '#edede8'
+const SUN = '#f5c543'
+const LEAF = '#56be68'
 
 interface PeakCache {
   key: string
@@ -109,22 +108,38 @@ export function SampleView() {
       const xe = xOf(e)
 
       // center line
-      ctx.strokeStyle = '#2a2d20'
+      ctx.strokeStyle = '#202020'
       ctx.lineWidth = 1
       ctx.beginPath()
       ctx.moveTo(0, mid)
       ctx.lineTo(w, mid)
       ctx.stroke()
 
-      // waveform columns
+      // waveform — dotted vertical columns (pixel-dust / halftone texture)
       const { mins, maxs } = peaks.current
-      for (let x = 0; x < w; x++) {
+      const COL = 3 // column pitch
+      const PITCH = 3.5 // vertical dot pitch
+      const DOT = 1.7 // dot size
+      ctx.fillStyle = INK
+      for (let x = 1; x < w; x += COL) {
+        let mn = Infinity
+        let mx = -Infinity
+        for (let i = x - 1; i <= x + 1 && i < w; i++) {
+          if (i < 0) continue
+          if (mins[i] < mn) mn = mins[i]
+          if (maxs[i] > mx) mx = maxs[i]
+        }
+        if (mn === Infinity) continue
         const inRegion = x >= xs && x <= xe
-        ctx.fillStyle = INK
-        ctx.globalAlpha = inRegion ? 0.92 : 0.22
-        const y0 = mid - maxs[x] * amp
-        const y1 = mid - mins[x] * amp
-        ctx.fillRect(x, y0, 1, Math.max(1, y1 - y0))
+        const colAmp = Math.max(Math.abs(mn), Math.abs(mx))
+        // dimmer + sparser at low amplitude
+        const strength = 0.4 + 0.6 * Math.min(1, colAmp * 2.4)
+        const vStep = colAmp < 0.05 ? PITCH * 2 : PITCH
+        ctx.globalAlpha = (inRegion ? 0.95 : 0.33) * strength
+        const yTop = mid - mx * amp
+        const yBot = mid - mn * amp
+        for (let y = mid; y >= yTop - 0.01; y -= vStep) ctx.fillRect(x - DOT / 2, y - DOT / 2, DOT, DOT)
+        for (let y = mid + vStep; y <= yBot + 0.01; y += vStep) ctx.fillRect(x - DOT / 2, y - DOT / 2, DOT, DOT)
       }
       ctx.globalAlpha = 1
 
@@ -151,27 +166,28 @@ export function SampleView() {
         ctx.globalAlpha = 1
       }
 
-      // selection box
+      // selection — yellow dashed rectangle, thin marker lines
+      const selTop = 5
+      const selBot = h - 5
       ctx.strokeStyle = SUN
       ctx.setLineDash([4, 4])
       ctx.lineWidth = 1
-      ctx.strokeRect(xs, 5, Math.max(1, xe - xs), h - 10)
+      ctx.strokeRect(xs, selTop, Math.max(1, xe - xs), selBot - selTop)
       ctx.setLineDash([])
-      // marker lines + handles
+      ctx.globalAlpha = 0.8
+      ctx.beginPath()
+      ctx.moveTo(xs + 0.5, selTop)
+      ctx.lineTo(xs + 0.5, selBot)
+      ctx.moveTo(xe + 0.5, selTop)
+      ctx.lineTo(xe + 0.5, selBot)
+      ctx.stroke()
+      ctx.globalAlpha = 1
+      // small solid yellow square handles at all four corners
       ctx.fillStyle = SUN
-      ctx.fillRect(xs - 3, 2, 7, 7)
-      ctx.strokeStyle = SUN
-      ctx.beginPath()
-      ctx.moveTo(xs + 0.5, 5)
-      ctx.lineTo(xs + 0.5, h - 5)
-      ctx.stroke()
-      ctx.fillStyle = SKY
-      ctx.fillRect(xe - 3, h - 9, 7, 7)
-      ctx.strokeStyle = SKY
-      ctx.beginPath()
-      ctx.moveTo(xe + 0.5, 5)
-      ctx.lineTo(xe + 0.5, h - 5)
-      ctx.stroke()
+      const HS = 6
+      for (const hx of [xs, xe]) {
+        for (const hy of [selTop, selBot]) ctx.fillRect(hx - HS / 2, hy - HS / 2, HS, HS)
+      }
 
       // playhead
       const ph = engine.samplePlayhead()
@@ -190,7 +206,7 @@ export function SampleView() {
 
       // zoom indicator
       if (v.start > 0.0001 || v.end < 0.9999) {
-        ctx.fillStyle = '#3a382a'
+        ctx.fillStyle = '#333330'
         ctx.fillRect(0, h - 2, w, 2)
         ctx.fillStyle = SUN
         ctx.fillRect(v.start * w, h - 2, Math.max(2, (v.end - v.start) * w), 2)

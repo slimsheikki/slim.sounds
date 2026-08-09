@@ -38,6 +38,7 @@ export function LeftRail() {
         <Knob
           label="VOLUME"
           color="#efe9d8"
+          utility
           size={58}
           value={volume}
           min={0}

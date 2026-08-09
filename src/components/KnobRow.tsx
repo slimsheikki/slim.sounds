@@ -4,11 +4,11 @@ import { Knob } from './Knob'
 import { fmtHz, fmtPct, fmtSecs } from '../utils/misc'
 import { midiName } from '../utils/notes'
 
-const C = ['#ffc940', '#55aae8', '#62c46f', '#f2823f']
+const C = ['#f5c543', '#3e9be0', '#56be68', '#ee5a2c']
 
 const BLANK: Omit<KnobSpec, 'onChange'> & { onChange: (v: number) => void } = {
   label: '--',
-  color: '#4a4836',
+  color: '#3a3a36',
   value: 0,
   min: 0,
   max: 1,

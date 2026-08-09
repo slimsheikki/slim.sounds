@@ -2,11 +2,11 @@ import { useStore } from '../state/store'
 import { PRESETS } from '../audio/presets'
 
 const CATS: { id: 'UI' | 'MOVE' | 'COMBAT' | 'GAME' | 'SOLAR'; label: string; color: string }[] = [
-  { id: 'UI', label: 'INTERFACE', color: '#55aae8' },
-  { id: 'MOVE', label: 'MOVEMENT', color: '#62c46f' },
+  { id: 'UI', label: 'INTERFACE', color: '#3e9be0' },
+  { id: 'MOVE', label: 'MOVEMENT', color: '#56be68' },
   { id: 'COMBAT', label: 'COMBAT', color: '#e85c4a' },
-  { id: 'GAME', label: 'GAMEPLAY', color: '#ffc940' },
-  { id: 'SOLAR', label: 'SOLARPUNK', color: '#f2823f' },
+  { id: 'GAME', label: 'GAMEPLAY', color: '#f5c543' },
+  { id: 'SOLAR', label: 'SOLARPUNK', color: '#ee5a2c' },
 ]
 
 export function PresetsOverlay() {

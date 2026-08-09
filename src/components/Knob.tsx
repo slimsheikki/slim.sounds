@@ -19,6 +19,8 @@ export interface KnobSpec {
 
 interface KnobProps extends KnobSpec {
   size?: number
+  /** cosmetic: near-black utility cap with a cream notch (volume/swing style) */
+  utility?: boolean
   onGestureStart?: () => void
   onGestureEnd?: () => void
 }
@@ -26,10 +28,23 @@ interface KnobProps extends KnobSpec {
 const SWEEP = 270 // degrees
 const START_ANGLE = -225 // pointing down-left
 
+/** mix a hex color toward another (t = 0..1) */
+function mixHex(hex: string, target: string, t: number): string {
+  const parse = (s: string): [number, number, number] => {
+    let x = s.replace('#', '')
+    if (x.length === 3) x = x.split('').map((c) => c + c).join('')
+    return [parseInt(x.slice(0, 2), 16) || 0, parseInt(x.slice(2, 4), 16) || 0, parseInt(x.slice(4, 6), 16) || 0]
+  }
+  const a = parse(hex)
+  const b = parse(target)
+  const c = a.map((v, i) => Math.round(v + (b[i] - v) * t))
+  return `#${c.map((v) => Math.max(0, Math.min(255, v)).toString(16).padStart(2, '0')).join('')}`
+}
+
 export function Knob(props: KnobProps) {
   const {
     label, color, value, min, max, step, exp, format, defaultValue,
-    onChange, options, disabled, size = 84, onGestureStart, onGestureEnd,
+    onChange, options, disabled, size = 84, utility, onGestureStart, onGestureEnd,
   } = props
 
   const drag = useRef<{ startY: number; startNorm: number; fine: boolean } | null>(null)
@@ -122,26 +137,30 @@ export function Knob(props: KnobProps) {
       ? format(value)
       : value.toFixed(2)
 
-  // geometry
-  const gradId = `cap-${label.replace(/\W+/g, '')}`
+  // geometry — solid colored glossy dome in a recessed well, dark notch indicator
+  const cap = utility ? '#232320' : color
+  const capHi = mixHex(cap, '#ffffff', utility ? 0.13 : 0.18) // broad soft highlight, upper-left
+  const capLo = mixHex(cap, '#000000', utility ? 0.38 : 0.25) // darker lower rim
+  const capEdge = mixHex(cap, '#000000', utility ? 0.62 : 0.42) // thin edge ring
+  const notchColor = utility ? '#efe9d8' : '#1a1a18'
+  const idBase = `${label.replace(/\W+/g, '')}-${cap.replace('#', '')}`
+  const gradId = `cap-${idBase}`
+  const wellId = `well-${idBase}`
   const r = 33
   const cx = 50
   const cy = 50
   const angle = START_ANGLE + SWEEP * norm
   const rad = (a: number) => (a * Math.PI) / 180
   const arcPoint = (a: number, radius: number) => [cx + radius * Math.cos(rad(a)), cy + radius * Math.sin(rad(a))]
-  const [ax, ay] = arcPoint(START_ANGLE, 44)
-  const [bx, by] = arcPoint(angle, 44)
-  const largeArc = SWEEP * norm > 180 ? 1 : 0
-  const [px, py] = arcPoint(angle, r - 8)
-  const [px2, py2] = arcPoint(angle, r - 22)
+  const [nx1, ny1] = arcPoint(angle, 8) // notch: near-center …
+  const [nx2, ny2] = arcPoint(angle, 29) // … to the cap edge
 
-  // dotted track
+  // tick ring — small gray dots circling ~300°, outside the well
   const dots = []
-  for (let i = 0; i <= 20; i++) {
-    const a = START_ANGLE + (SWEEP * i) / 20
-    const [dx, dy] = arcPoint(a, 44)
-    dots.push(<circle key={i} cx={dx} cy={dy} r={1.1} fill="#33322a" />)
+  for (let i = 0; i < 26; i++) {
+    const a = -240 + (300 * i) / 25
+    const [dx, dy] = arcPoint(a, 45)
+    dots.push(<circle key={i} cx={dx} cy={dy} r={1.25} fill="#3a3a36" />)
   }
 
   return (
@@ -171,28 +190,25 @@ export function Knob(props: KnobProps) {
         onDoubleClick={onDoubleClick}
       >
         <defs>
-          <radialGradient id={gradId} cx="38%" cy="30%" r="80%">
-            <stop offset="0%" stopColor="#3a3a33" />
-            <stop offset="55%" stopColor="#23231e" />
-            <stop offset="100%" stopColor="#101010" />
+          <radialGradient id={gradId} cx="35%" cy="28%" r="78%">
+            <stop offset="0%" stopColor={capHi} />
+            <stop offset="55%" stopColor={cap} />
+            <stop offset="100%" stopColor={capLo} />
           </radialGradient>
+          <linearGradient id={wellId} x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stopColor="#030303" />
+            <stop offset="100%" stopColor="#151513" />
+          </linearGradient>
         </defs>
         {dots}
+        {/* recessed near-black well */}
+        <circle cx={cx} cy={cy} r={37.5} fill={`url(#${wellId})`} stroke="#000" strokeWidth="1" />
+        {/* soft shadow under the cap's lower edge */}
+        <circle cx={cx} cy={cy + 2.6} r={r} fill="#000" opacity="0.55" />
+        {/* solid colored glossy dome */}
+        <circle cx={cx} cy={cy} r={r} fill={`url(#${gradId})`} stroke={capEdge} strokeWidth="1.2" />
         {!disabled && (
-          <path
-            d={`M ${ax} ${ay} A 44 44 0 ${largeArc} 1 ${bx} ${by}`}
-            stroke={color}
-            strokeWidth="2.6"
-            strokeLinecap="round"
-            fill="none"
-            opacity="0.95"
-          />
-        )}
-        <circle cx={cx} cy={cy + 2} r={r} fill="#000" opacity="0.55" />
-        <circle cx={cx} cy={cy} r={r} fill={`url(#${gradId})`} stroke="#000" strokeWidth="1.5" />
-        <circle cx={cx} cy={cy} r={r - 1.5} fill="none" stroke="#ffffff14" strokeWidth="1" />
-        {!disabled && (
-          <line x1={px2} y1={py2} x2={px} y2={py} stroke={color} strokeWidth="3.4" strokeLinecap="round" />
+          <line x1={nx1} y1={ny1} x2={nx2} y2={ny2} stroke={notchColor} strokeWidth="4.6" strokeLinecap="round" />
         )}
       </svg>
     </div>

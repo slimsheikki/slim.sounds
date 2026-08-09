@@ -56,7 +56,12 @@ export function Piano() {
     heldRemove(midi)
   }
 
-  const whiteW = 100 / whites.length
+  // one narrow (~60% width) cosmetic utility key sits at the far left of the keybed
+  const whiteW = 100 / (whites.length + 0.6)
+  const utilW = whiteW * 0.6
+
+  // cosmetic voice LEDs on fixed pitch classes (left octave only): C# / F# / A#
+  const DOT_CLASS: Record<number, string> = { 1: 'key-dot-sky', 6: 'key-dot-leaf', 10: 'key-dot-amber' }
 
   return (
     <div className="piano-row">
@@ -86,11 +91,12 @@ export function Piano() {
         onPointerCancel={(e) => up(e.pointerId)}
         onPointerLeave={(e) => up(e.pointerId)}
       >
+        <div className="piano-util" style={{ width: `calc(${utilW}% - 2px)` }} aria-hidden="true" />
         {whites.map((m, i) => (
           <div
             key={m}
             className={`piano-white${held.includes(m) ? ' held' : ''}`}
-            style={{ left: `${i * whiteW}%`, width: `calc(${whiteW}% - 2px)` }}
+            style={{ left: `${utilW + i * whiteW}%`, width: `calc(${whiteW}% - 2px)` }}
             onPointerDown={(e) => {
               e.preventDefault()
               down(m, e.pointerId)
@@ -109,7 +115,8 @@ export function Piano() {
         {keys.filter(isBlack).map((m) => {
           // position black key between its neighboring whites
           const whiteIndex = whites.filter((w) => w < m).length
-          const left = whiteIndex * whiteW - whiteW * 0.3
+          const left = utilW + whiteIndex * whiteW - whiteW * 0.3
+          const dotCls = m - base < 12 ? DOT_CLASS[m % 12] : undefined
           return (
             <div
               key={m}
@@ -126,6 +133,7 @@ export function Piano() {
                 }
               }}
             >
+              {dotCls && <span className={`key-dot ${dotCls}`} />}
               {labelFor(m) && <span className="key-tag">{labelFor(m)}</span>}
             </div>
           )

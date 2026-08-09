@@ -2,7 +2,7 @@ import { useEffect, useRef } from 'react'
 import { engine } from '../audio/Engine'
 
 /** Minimal live oscilloscope reading the master analyser. */
-export function Scope({ width = 96, height = 44, color = '#e9e2cc' }: { width?: number; height?: number; color?: string }) {
+export function Scope({ width = 96, height = 44, color = '#edede8' }: { width?: number; height?: number; color?: string }) {
   const ref = useRef<HTMLCanvasElement>(null)
 
   useEffect(() => {

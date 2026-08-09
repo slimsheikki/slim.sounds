@@ -6,9 +6,9 @@ import { WaveGlyph } from '../icons'
 import { MiniDrag } from '../MiniDrag'
 import { Scope } from '../Scope'
 
-const LEAF = '#62c46f'
-const SUN = '#ffc940'
-const SKY = '#55aae8'
+const LEAF = '#56be68'
+const SUN = '#f5c543'
+const SKY = '#3e9be0'
 
 const A_MAX = 1.5
 const D_MAX = 1.5
@@ -95,15 +95,15 @@ function EnvelopeEditor() {
             </linearGradient>
           </defs>
           {[0.25, 0.5, 0.75].map((f) => (
-            <line key={f} x1={PAD} x2={W - PAD} y1={yTop + f * (yBot - yTop)} y2={yTop + f * (yBot - yTop)} stroke="#232619" strokeWidth="1" />
+            <line key={f} x1={PAD} x2={W - PAD} y1={yTop + f * (yBot - yTop)} y2={yTop + f * (yBot - yTop)} stroke="#202020" strokeWidth="1" />
           ))}
           <path d={`M ${PAD} ${yBot} L ${x1} ${yTop} L ${x2} ${ys} L ${x3} ${ys} L ${x4} ${yBot} Z`} fill="url(#envfill)" />
           <path d={`M ${PAD} ${yBot} L ${x1} ${yTop} L ${x2} ${ys} L ${x3} ${ys} L ${x4} ${yBot}`} fill="none" stroke={LEAF} strokeWidth="2" strokeLinejoin="round" />
-          <line x1={x3} y1={ys} x2={x3} y2={yBot} stroke="#2e3322" strokeDasharray="3 3" />
+          <line x1={x3} y1={ys} x2={x3} y2={yBot} stroke="#2a2a28" strokeDasharray="3 3" />
           {pts.map((p) => (
             <g key={p.pt} className="env-pt" onPointerDown={grab(p.pt)}>
               <circle cx={p.x} cy={p.y} r="14" fill="transparent" />
-              <circle cx={p.x} cy={p.y} r="5" fill="#0d0f0a" stroke={p.color} strokeWidth="2" />
+              <circle cx={p.x} cy={p.y} r="5" fill="#0a0a0a" stroke={p.color} strokeWidth="2" />
             </g>
           ))}
         </svg>
@@ -197,27 +197,27 @@ function PitchEnvEditor() {
     <>
       <div className="env-editor">
         <svg ref={svgRef} viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="none" onPointerMove={onMove} onPointerUp={release} onPointerCancel={release}>
-          <line x1={PAD} x2={W - PAD} y1={H / 2} y2={H / 2} stroke="#2a2d20" strokeWidth="1" />
+          <line x1={PAD} x2={W - PAD} y1={H / 2} y2={H / 2} stroke="#202020" strokeWidth="1" />
           {[12, 24].map((st) => (
             <g key={st}>
-              <line x1={PAD} x2={W - PAD} y1={yOf(st)} y2={yOf(st)} stroke="#1d2016" strokeWidth="1" />
-              <line x1={PAD} x2={W - PAD} y1={yOf(-st)} y2={yOf(-st)} stroke="#1d2016" strokeWidth="1" />
-              <text x={W - PAD - 2} y={yOf(st) - 2} fill="#4a4836" fontSize="7" textAnchor="end">+{st}</text>
-              <text x={W - PAD - 2} y={yOf(-st) - 2} fill="#4a4836" fontSize="7" textAnchor="end">-{st}</text>
+              <line x1={PAD} x2={W - PAD} y1={yOf(st)} y2={yOf(st)} stroke="#1c1c1b" strokeWidth="1" />
+              <line x1={PAD} x2={W - PAD} y1={yOf(-st)} y2={yOf(-st)} stroke="#1c1c1b" strokeWidth="1" />
+              <text x={W - PAD - 2} y={yOf(st) - 2} fill="#4a4a46" fontSize="7" textAnchor="end">+{st}</text>
+              <text x={W - PAD - 2} y={yOf(-st) - 2} fill="#4a4a46" fontSize="7" textAnchor="end">-{st}</text>
             </g>
           ))}
           <polyline points={pitchCurvePoints(penv.start, penv.end, penv.time, penv.bend, W, H, PAD)} fill="none" stroke={SUN} strokeWidth="2" />
           <g className="env-pt" onPointerDown={grab('start')}>
             <circle cx={PAD} cy={yOf(penv.start)} r="14" fill="transparent" />
-            <circle cx={PAD} cy={yOf(penv.start)} r="5" fill="#0d0f0a" stroke={SUN} strokeWidth="2" />
+            <circle cx={PAD} cy={yOf(penv.start)} r="5" fill="#0a0a0a" stroke={SUN} strokeWidth="2" />
           </g>
           <g className="env-pt" onPointerDown={grab('end')}>
             <circle cx={xEnd} cy={yOf(penv.end)} r="14" fill="transparent" />
-            <circle cx={xEnd} cy={yOf(penv.end)} r="5" fill="#0d0f0a" stroke={SKY} strokeWidth="2" />
+            <circle cx={xEnd} cy={yOf(penv.end)} r="5" fill="#0a0a0a" stroke={SKY} strokeWidth="2" />
           </g>
           <g className="env-pt" onPointerDown={grab('bend')}>
             <circle cx={midX} cy={yOf(midV)} r="12" fill="transparent" />
-            <rect x={midX - 4} y={yOf(midV) - 4} width="8" height="8" rx="2" fill="#0d0f0a" stroke={LEAF} strokeWidth="1.6" />
+            <rect x={midX - 4} y={yOf(midV) - 4} width="8" height="8" rx="2" fill="#0a0a0a" stroke={LEAF} strokeWidth="1.6" />
           </g>
         </svg>
       </div>
@@ -375,14 +375,14 @@ function MainTab() {
         <h4>OSCILLATORS</h4>
         <div className="row">
           <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
-            <WaveGlyph wave={synth.o1.wave} size={20} color="#ffc940" />
+            <WaveGlyph wave={synth.o1.wave} size={20} color="#f5c543" />
             <b>{synth.o1.semi > 0 ? '+' : ''}{synth.o1.semi}st</b>
           </span>
           <b>{Math.round(synth.o1.level * 100)}%</b>
         </div>
         <div className="row">
           <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
-            <WaveGlyph wave={synth.o2.wave} size={20} color="#55aae8" />
+            <WaveGlyph wave={synth.o2.wave} size={20} color="#3e9be0" />
             <b>{synth.o2.semi > 0 ? '+' : ''}{synth.o2.semi}st</b>
           </span>
           <b>{Math.round(synth.o2.level * 100)}%</b>
@@ -401,7 +401,7 @@ function MainTab() {
         <h4>PITCH ENVELOPE</h4>
         <div className="flexfill">
           <svg viewBox="0 0 300 130" preserveAspectRatio="none">
-            <line x1="8" x2="292" y1="65" y2="65" stroke="#2a2d20" />
+            <line x1="8" x2="292" y1="65" y2="65" stroke="#202020" />
             <polyline points={pitchCurvePoints(synth.penv.start, synth.penv.end, synth.penv.time, synth.penv.bend, 300, 130, 8)} fill="none" stroke={SUN} strokeWidth="2.4" />
           </svg>
         </div>
