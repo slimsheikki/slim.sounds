@@ -73,7 +73,7 @@ export default function App() {
             <FunctionGrid />
           </div>
           {mode !== 'ambient' && <StepSeq />}
-          {mode !== 'ambient' && <Piano />}
+          <Piano />
         </div>
       </div>
       {dragOver && (

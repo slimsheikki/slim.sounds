@@ -47,6 +47,9 @@ class AmbientEngine {
   private nextCycle = 0
   running = false
 
+  // held preview voices played from the piano (independent of the scene loop)
+  private previews = new Map<string, { gen: GenHandle | null; tone: BiquadFilterNode; gain: GainNode; send: GainNode }>()
+
   private ensure() {
     if (this.ctx) return this.ctx
     const ctx = getCtx()
@@ -216,9 +219,58 @@ class AmbientEngine {
     }
   }
 
+  /** Play the given layer's voice at a pitch while a piano key is held. */
+  noteOn(key: string, track: Track, midi: number) {
+    const ctx = this.ensure()
+    this.noteOff(key)
+    const def = LAYER_DEFS[track.type]
+    const tone = ctx.createBiquadFilter(); tone.type = 'lowpass'; tone.Q.value = 0.6
+    tone.frequency.value = toneCutoff(track.tone)
+    const gain = ctx.createGain(); gain.gain.value = 0
+    const send = ctx.createGain(); send.gain.value = track.space
+    tone.connect(gain); gain.connect(this.dryBus!); gain.connect(send); send.connect(this.reverb!)
+    const now = ctx.currentTime
+    if (def.continuous) {
+      const gen = buildContinuous(ctx, track.type, tone, def.base, track.motion, midi)
+      const atk = track.type === 'pad' || track.type === 'drone' || track.type === 'surge' ? 0.3 : 0.12
+      gain.gain.setValueAtTime(0, now)
+      gain.gain.linearRampToValueAtTime(track.level, now + atk)
+      this.previews.set(key, { gen, tone, gain, send })
+    } else {
+      spawnEvent(ctx, track.type, tone, now + 0.01, midi)
+      gain.gain.setValueAtTime(track.level, now)
+      this.previews.set(key, { gen: null, tone, gain, send })
+      window.setTimeout(() => this.noteOff(key), 2800)
+    }
+  }
+
+  noteOff(key: string) {
+    const p = this.previews.get(key)
+    if (!p || !this.ctx) return
+    this.previews.delete(key)
+    const now = this.ctx.currentTime
+    if (p.gen) {
+      p.gain.gain.cancelScheduledValues(now)
+      p.gain.gain.setTargetAtTime(0, now, 0.18)
+      const { gen, tone, gain, send } = p
+      window.setTimeout(() => {
+        gen.stop()
+        try { tone.disconnect(); gain.disconnect(); send.disconnect() } catch { /* noop */ }
+      }, 1000)
+    } else {
+      const { tone, gain, send } = p
+      window.setTimeout(() => { try { tone.disconnect(); gain.disconnect(); send.disconnect() } catch { /* noop */ } }, 200)
+    }
+  }
+
+  private killPreviews() {
+    for (const key of [...this.previews.keys()]) this.noteOff(key)
+  }
+
   stop() {
     if (this.timer !== null) { window.clearInterval(this.timer); this.timer = null }
     this.running = false
+    this.killPreviews()
     const ctx = this.ctx
     if (!ctx) return
     for (const n of this.nodes.values()) {
