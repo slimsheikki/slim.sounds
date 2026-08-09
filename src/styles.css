@@ -250,7 +250,7 @@ input, select { font-family: inherit; }
 .t-btn:active { box-shadow: var(--btn-shadow-down); transform: translateY(1px); }
 .t-btn.lit-play { filter: brightness(1.28); }
 .t-btn.lit-rec { filter: brightness(1.3); animation: pulse 0.9s infinite; }
-.t-btn .loop-dot { position: absolute; right: 9px; bottom: 9px; width: 5px; height: 5px; border-radius: 50%; background: #2c2c26; box-shadow: inset 0 1px 1px #000; }
+.t-btn .loop-dot { position: absolute; right: 9px; bottom: 9px; width: 5px; height: 5px; border-radius: 50%; background: #2e5c38; box-shadow: inset 0 1px 1px #00000066; }
 .t-btn.lit-loop { filter: brightness(1.2); }
 .t-btn.lit-loop .loop-dot { background: var(--leaf); box-shadow: 0 0 4px var(--leaf); }
 
@@ -410,7 +410,7 @@ input, select { font-family: inherit; }
   filter: drop-shadow(0 3px 3px rgba(0, 0, 0, 0.45));
 }
 .piano-white { position: absolute; top: 0; bottom: 0; border-radius: 0 0 5px 5px;
-  background: linear-gradient(180deg, #f6f1e1 0%, #e9e3d2 55%, #dbd5c3 100%);
+  background: linear-gradient(180deg, #f2edde 0%, #ebe5d4 55%, #e4decb 100%);
   border: 1px solid #00000088;
   box-shadow: inset 0 -3px 0 #00000018, 0 2px 2px #00000066;
   cursor: pointer;

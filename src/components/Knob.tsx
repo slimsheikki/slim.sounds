@@ -139,13 +139,15 @@ export function Knob(props: KnobProps) {
 
   // geometry — solid colored glossy dome in a recessed well, dark notch indicator
   const cap = utility ? '#232320' : color
-  const capHi = mixHex(cap, '#ffffff', utility ? 0.13 : 0.18) // broad soft highlight, upper-left
-  const capLo = mixHex(cap, '#000000', utility ? 0.38 : 0.25) // darker lower rim
-  const capEdge = mixHex(cap, '#000000', utility ? 0.62 : 0.42) // thin edge ring
+  const capHi = mixHex(cap, '#ffffff', utility ? 0.16 : 0.18) // broad soft highlight, upper-left
+  const capLo = mixHex(cap, '#000000', utility ? 0.45 : 0.28) // darker lower rim
+  const capEdge = mixHex(cap, '#000000', utility ? 0.65 : 0.5) // thin edge ring
   const notchColor = utility ? '#efe9d8' : '#1a1a18'
   const idBase = `${label.replace(/\W+/g, '')}-${cap.replace('#', '')}`
   const gradId = `cap-${idBase}`
+  const rimId = `rim-${idBase}`
   const wellId = `well-${idBase}`
+  const shadId = `shad-${idBase}`
   const r = 33
   const cx = 50
   const cy = 50
@@ -190,23 +192,35 @@ export function Knob(props: KnobProps) {
         onDoubleClick={onDoubleClick}
       >
         <defs>
-          <radialGradient id={gradId} cx="35%" cy="28%" r="78%">
+          {/* dome: broad soft highlight upper-left → base color → clearly darker lower rim */}
+          <radialGradient id={gradId} cx="35%" cy="30%" r="66%">
             <stop offset="0%" stopColor={capHi} />
-            <stop offset="55%" stopColor={cap} />
+            <stop offset="16%" stopColor={capHi} />
+            <stop offset="52%" stopColor={cap} />
             <stop offset="100%" stopColor={capLo} />
+          </radialGradient>
+          {/* rim vignette — guarantees the edge rounds off at small scale */}
+          <radialGradient id={rimId} cx="50%" cy="52%" r="50%">
+            <stop offset="0%" stopColor="#000000" stopOpacity="0" />
+            <stop offset="74%" stopColor="#000000" stopOpacity="0" />
+            <stop offset="100%" stopColor="#000000" stopOpacity="0.3" />
           </radialGradient>
           <linearGradient id={wellId} x1="0" y1="0" x2="0" y2="1">
             <stop offset="0%" stopColor="#030303" />
-            <stop offset="100%" stopColor="#151513" />
+            <stop offset="100%" stopColor="#1a1a18" />
           </linearGradient>
+          <filter id={shadId} x="-40%" y="-40%" width="180%" height="180%">
+            <feGaussianBlur stdDeviation="1.8" />
+          </filter>
         </defs>
         {dots}
         {/* recessed near-black well */}
         <circle cx={cx} cy={cy} r={37.5} fill={`url(#${wellId})`} stroke="#000" strokeWidth="1" />
-        {/* soft shadow under the cap's lower edge */}
-        <circle cx={cx} cy={cy + 2.6} r={r} fill="#000" opacity="0.55" />
+        {/* soft blurred shadow under the cap's lower edge — the dome floats in its socket */}
+        <circle cx={cx} cy={cy + 3} r={r - 0.5} fill="#000" opacity="0.6" filter={`url(#${shadId})`} />
         {/* solid colored glossy dome */}
         <circle cx={cx} cy={cy} r={r} fill={`url(#${gradId})`} stroke={capEdge} strokeWidth="1.2" />
+        <circle cx={cx} cy={cy} r={r} fill={`url(#${rimId})`} />
         {!disabled && (
           <line x1={nx1} y1={ny1} x2={nx2} y2={ny2} stroke={notchColor} strokeWidth="4.6" strokeLinecap="round" />
         )}
